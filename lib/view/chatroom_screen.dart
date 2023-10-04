@@ -1,11 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_application/model/firebase_user_model/firebase_user_model.dart';
 import 'package:chat_application/resources/app_color.dart';
-import 'package:chat_application/utils/firebase_database/firebase_firestore/chat_user.dart';
 import 'package:chat_application/view_model/chatroomScreenProvider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/firebase_user_model/firebase_chat_user_model.dart';
@@ -14,7 +12,6 @@ class ChatRoomScreen extends StatefulWidget{
 
   FirebaseUserDetailModel receiver;
   ChatRoomScreen({super.key, required this.receiver});
-
   @override
   State<ChatRoomScreen> createState() => _ChatRoomScreenState();
 }
@@ -118,10 +115,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                         children: [
                                           Text(chatList[index].time
                                               .substring(11, 16)),
-                                          if (chatList[index].senderUID ==
-                                              _auth.currentUser!.uid
-                                                  .toString())
-                                            const Icon(Icons.check),
+                                          if(chatList[index].senderUID == _auth.currentUser!.uid)Icon((chatList[index].status == 2) ? Icons.done_all : Icons.check),
                                         ],
                                       )
                                     ],

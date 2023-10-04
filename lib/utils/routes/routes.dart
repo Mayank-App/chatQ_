@@ -1,5 +1,6 @@
 import 'package:chat_application/utils/routes/routes_name.dart';
 import 'package:chat_application/view/chatroom_screen.dart';
+import 'package:chat_application/view/contactList_screen.dart';
 import 'package:chat_application/view/forget_password_screen.dart';
 import 'package:chat_application/view/home_screen.dart';
 import 'package:chat_application/view/personal_profile_screen.dart';
@@ -30,6 +31,8 @@ class Routes{
       case RoutesName.personalProfileScreen:
         Map<String,dynamic> personal = settings.arguments as Map<String,dynamic>;
         return MaterialPageRoute(builder: (BuildContext context)=>UserProfileView(user:personal["user"]));
+      case RoutesName.contactListScreen:
+        return MaterialPageRoute(builder: (BuildContext context)=>ContactList());
       default:
         return MaterialPageRoute(builder: (_){
           return  const Scaffold(

@@ -16,6 +16,7 @@ class UserProfileStore{
     });
   }
 
+
   static Stream<List<FirebaseUserDetailModel>> getUsersProfile()
   {
     var datas = databaseStore.snapshots();

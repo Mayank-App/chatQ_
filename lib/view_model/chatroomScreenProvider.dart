@@ -33,32 +33,34 @@ class ChatRoomScreenProvider extends ChangeNotifier {
     String chatID = now.millisecondsSinceEpoch.toString();
     if (mess.isNotEmpty || isImage) {
       ChatUserStore.sendMessage(FirebaseChatUserModel(
-          message: !isImage?mess:"",
-          senderUID: _auth.currentUser!.uid,
-          time: time,
-          receiverUID: receiver,
-          chatID: chatID,
+        message: !isImage ? mess : "",
+        senderUID: _auth.currentUser!.uid,
+        time: time,
+        isForwarded: 0,
+        receiverUID: receiver,
+        chatID: chatID,
         //  readTime: "u",
-          status: 0,
-         // sentTime: time,
-          visibleNo: 3,
-          img: isImage?imageUrl:"",
+        status: 0,
+        // sentTime: time,
+        visibleNo: 3,
+        img: isImage ? imageUrl : "",
+        sentTime: time,
       ));
     }
   }
+
   pickAndSendImage(String receiver) async {
     debugPrint("pick going to upload");
     await requestPermission(receiver);
-
   }
-  String getChatID(String r, String s) {
 
-    List<String> l = [r,s];
+  static String getChatID(String r, String s) {
+    List<String> l = [r, s];
     l.sort();
     debugPrint("returning chat id");
     return l.join("ChatQ");
-
   }
+
   Future<void> requestPermission(String receiver) async {
     PermissionStatus status = await Permission.camera.request();
 
@@ -69,7 +71,6 @@ class ChatRoomScreenProvider extends ChangeNotifier {
       debugPrint("Image Fetched going to upload");
       await uploadImage(receiver);
       debugPrint("Image Uploaded");
-
     } else {
       debugPrint("Permission not granted in else");
       debugPrint("Going to fetch image in else");
@@ -80,6 +81,7 @@ class ChatRoomScreenProvider extends ChangeNotifier {
       // openAppSettings();
     }
   }
+
   bool isUploaded = true;
 
   bool isPicked = false;
@@ -87,9 +89,14 @@ class ChatRoomScreenProvider extends ChangeNotifier {
   uploadImage(String receiver) async {
     if (!isPicked) return;
     User user = _auth.currentUser!;
-    String timeId = DateTime.now().microsecondsSinceEpoch.toString();
+    String timeId = DateTime
+        .now()
+        .microsecondsSinceEpoch
+        .toString();
 
-    String url = await FirebaseImageUpload.sendImageWithSenderAndReceiverChatIDAndTimeOnStorage(getChatID(receiver, user.uid.toString()), timeId, pickedImage);
+    String url = await FirebaseImageUpload
+        .sendImageWithSenderAndReceiverChatIDAndTimeOnStorage(
+        getChatID(receiver, user.uid.toString()), timeId, pickedImage);
     sendMessage(receiver, isImage: true, imageUrl: url);
     // await UsersChat.sendMessage(MessageModel(message: "", senderUID: user.uid, time: timeId, receiverUID: receiver, chatID: timeId, status: 0, sentTime: timeId, img: url)).then((value){
     // debugPrint("Success uploading image on database");
@@ -100,7 +107,9 @@ class ChatRoomScreenProvider extends ChangeNotifier {
     isPicked = false;
     pickedImage = null;
   }
+
   File? pickedImage;
+
   fetchImage() async {
     try {
       XFile? pickImage = await ImagePicker().pickImage(
@@ -111,23 +120,33 @@ class ChatRoomScreenProvider extends ChangeNotifier {
       pickedImage = tmpImage;
       isPicked = true;
       debugPrint("image fetched $pickedImage");
-    } on Exception catch (_)
-    {}
+    } on Exception catch (_) {}
   }
-  Stream<List<FirebaseChatUserModel>> getAllMessage(String receiverUID)
-  {
-    var datas = ChatUserStore.getUsersMessage(receiverUID,_auth.currentUser!.uid);
-    // datas.map((List<FirebaseChatUserModel> chatsList){
-    //   for(var chat in chatsList){
-    //     // debugPrint(user.imageUrl.toString());
-    //     // if(chat.status < 2){
-    //     //
-    //     // }
-    //   }
-    // });
-    return datas;
+
+  Stream<List<FirebaseChatUserModel>> getAllMessage(String receiver) {
+    String currentUser = _auth.currentUser!.uid;
+    String now = DateTime.now().toString();
+
+    Stream<List<FirebaseChatUserModel>> chats =
+    ChatUserStore.getUsersMessage(currentUser, receiver).map((messages) {
+      // debugPrint(messages.toString());
+      return messages.map((message) {
+        // debugPrint(message.message.toString());
+        if (message.senderUID != currentUser && message.status < 2) {
+          message.readTime = now.toString();
+          message.status = 2;
+          if (message.deliveredTime != "")
+            message.deliveredTime = now.toString();
+          // debugPrint(now.toString() + message.chatID);
+          ChatUserStore.updateMessageStatus(message)
+              .then((value) {})
+              .onError((error, stackTrace) {});
+        }
+        return message;
+      }).toList();
+    });
+    // debugPrint(chats.toString());
+    return chats;
   }
+
 }
-
-
-

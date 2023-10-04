@@ -1,3 +1,5 @@
+
+
 import 'package:chat_application/model/firebase_user_model/firebase_user_model.dart';
 import 'package:chat_application/utils/routes/routes_name.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -53,6 +55,28 @@ class HomeScreenProvider extends ChangeNotifier {
     });
     return datas;
   }
+
+  // Stream<List<FirebaseUserDetailModel>>? getUserWhomChat() {
+  //   String senderUID = FirebaseAuth.instance.currentUser!.uid;
+  //
+  //   return getAllUsers().asyncMap((usersList) async {
+  //     List<FirebaseUserDetailModel> users = [];
+  //
+  //     for (FirebaseUserDetailModel user in usersList) {
+  //       // debugPrint((await ChatUserStore().isChatRoomExist(user.uid, senderUID)).toString());
+  //       bool isChatExist = await ChatUserStore().isChatRoomExist(user.uid, senderUID);
+  //       if (user.uid != senderUID && isChatExist) {
+  //         users.add(user);
+  //         debugPrint(user.toString());
+  //       }
+  //     }
+  //     // notifyListeners();
+  //
+  //     // debugPrint(users.toString());
+  //
+  //     return users;
+  //   });
+  // }
 }
 
 

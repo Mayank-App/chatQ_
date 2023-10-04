@@ -45,98 +45,97 @@ class _HomeScreenState extends State<HomeScreen> {
             }
         ),
       ),
-       body: Container(
-         color: AppColors.blackFade,
-         child: Column(
-           children: [
-             Expanded(
-                 child:Consumer<HomeScreenProvider>(
-                   builder: (context, value, child) {
-                     return StreamBuilder<List<FirebaseUserDetailModel>>(
-                       stream: value.getAllUsers(),
-                       builder: (BuildContext context, AsyncSnapshot<List<FirebaseUserDetailModel>> snapshot) {
-                         List<FirebaseUserDetailModel>? users = snapshot.data;
-                       if (snapshot.connectionState == ConnectionState.waiting) {
-                         return const CircularProgressIndicator();
-                       }
-                       if (snapshot.hasError) {
-                         return const Text("Error");
-                       }
-                       return ListView.builder(
-                         itemCount : users!.length,
-                           itemBuilder: (context,index){
-                           if(users[index].uid==value.currentUser.uid) {
-                             return const SizedBox(height: 0,width: 0,);
-                           }
-                           return Container(
-                             height: 94,
-                             width: 85,
-                             child: InkWell(
-                               onTap: (){
-                                 Navigator.pushNamed(context, RoutesName.chatRoomScreen, arguments: {"user":users[index]});
-                               },
-                               child: Column(
-                                 children: [
-                                   Padding(
-                                     padding: const EdgeInsets.all(15),
-                                     child: Row(
-                                       children: [
-                                         InkWell(
-                                           onTap: (){
-                                             userProfileAlertBox(users[index]);
-                                             //    Navigator.pushNamed(context, RoutesName.chatRoomScreen,arguments: users[index]);
-                                           },
-                                           child: SizedBox(
-                                             width: 60,
-                                             height: 60,
-                                             child: ClipOval(
-                                               child: CachedNetworkImage(
-                                                 imageUrl: users[index].imageUrl.toString(),
-                                                 fit: BoxFit.fill,
+       body: Stack(
+         children: [
+           Container(
+             color: AppColors.blackFade,
+             child: Column(
+               children: [
+                 Expanded(
+                     child:Consumer<HomeScreenProvider>(
+                         builder: (context, value, child) {
+                           return StreamBuilder<List<FirebaseUserDetailModel>>(
+                             stream: value.getAllUsers(),
+                             builder: (BuildContext context, AsyncSnapshot<List<FirebaseUserDetailModel>> snapshot) {
+                               List<FirebaseUserDetailModel>? users = snapshot.data;
+                               if (snapshot.connectionState == ConnectionState.waiting) {
+                                 return const CircularProgressIndicator();
+                               }
+                               if (snapshot.hasError) {
+                                 return const Text("Error");
+                               }
+                               return ListView.builder(
+                                   itemCount : users!.length,
+                                   itemBuilder: (context,index){
+                                     if(users[index].uid==value.currentUser.uid) {
+                                       return const SizedBox(height: 0,width: 0,);
+                                     }
+                                     return Container(
+                                       height: 94,
+                                       width: 85,
+                                       child: InkWell(
+                                         onTap:(){  Navigator.pushNamed(context, RoutesName.chatRoomScreen, arguments: {"user":users[index]});},
+                                         child: Column(
+                                           children: [
+                                             Padding(
+                                               padding: const EdgeInsets.all(15),
+                                               child: Row(
+                                                 children: [
+                                                   InkWell(
+                                                     onTap: (){
+                                                       userProfileAlertBox(users[index]);
+                                                       //    Navigator.pushNamed(context, RoutesName.chatRoomScreen,arguments: users[index]);
+                                                     },
+                                                     child: SizedBox(
+                                                       width: 60,
+                                                       height: 60,
+                                                       child: ClipOval(
+                                                         child: CachedNetworkImage(
+                                                           imageUrl: users[index].imageUrl.toString(),
+                                                           fit: BoxFit.fill,
+                                                         ),
+                                                       ),
+                                                     ),
+                                                   ),
+                                                   SizedBox(width: 20,),
+                                                   Text(users[index].name,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 22),)
+
+                                                 ],
                                                ),
                                              ),
-                                           ),
+                                             Divider(height: 4,color: Colors.black,)
+                                           ],
                                          ),
-                                         SizedBox(width: 20,),
-                                         Text(users[index].name,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 22),)
-
-                                       ],
-                                     ),
-                                   ),
-                                   Divider(height: 4,color: Colors.black,)
-                                 ],
-                               ),
-                             ),
-                             // child: ListTile(
-                             //   onTap: (){
-                             //       Navigator.pushNamed(context, RoutesName.chatRoomScreen, arguments: {"user":users[index]});
-                             //  },
-                             //   leading: InkWell(
-                             //     onTap: (){
-                             //       userProfileAlertBox(users[index]);
-                             //   //    Navigator.pushNamed(context, RoutesName.chatRoomScreen,arguments: users[index]);
-                             //     },
-                             //     child: SizedBox(
-                             //          width: 60,
-                             //         height: 60,
-                             //       child: ClipOval(
-                             //         child: CachedNetworkImage(
-                             //           imageUrl: users[index].imageUrl.toString(),
-                             //           fit: BoxFit.fill,
-                             //         ),
-                             //       ),
-                             //     ),
-                             //   ),
-                             //   title: Text(users[index].name,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 22),)
-                             // ),
-                           );
-                       });
-                     },);
-                   }
-                 ) )
-           ],
-         ),
-       ),
+                                       ),
+                                     );
+                                   });
+                             },);
+                         }
+                     ) )
+               ],
+             ),
+           ),
+           Align(
+             alignment: Alignment.bottomRight,
+             child: SizedBox(
+               height: 80,
+               width: 80,
+               child: InkWell(
+                 onTap: (){
+                   Navigator.pushNamed(context, RoutesName.contactListScreen);
+                 },
+                 child: Padding(
+                   padding: const EdgeInsets.only(bottom: 40,right: 20),
+                   child: CircleAvatar(
+                     backgroundColor: AppColors.blueAccent,
+                       radius:25,
+                       child: Icon(Icons.add,color: AppColors.white,size: 40,)),
+                 ),
+               ),
+             ),
+           )
+         ],
+       )
     );
   }
    userProfileAlertBox(FirebaseUserDetailModel user){
@@ -201,78 +200,78 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     });
   }
-  BottomSheet(FirebaseUserDetailModel user){
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return Consumer<SignUpScreenProvider>(builder: (context, value,  child) {
-          return Container(
-            height: 240,
-            color: AppColors.blackFade,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      children: [
-                        const Expanded(child: Text("Edit Profile Picture",style: TextStyle(color: Colors.white,fontSize: 25,fontWeight: FontWeight.bold),)),
-                        InkWell(onTap:()=>Navigator.pop(context),child: const Icon(Icons.cancel_outlined,color: AppColors.blueAccent,size: 35,))
-                      ],
-                    ),
-                    SizedBox(height: 30,),
-                    SizedBox(
-                      height: 60,
-                      child: Card(
-                        color: AppColors.blackFade,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: InkWell(
-                            onTap: (){
-                              value.requestPermission();
-                            },
-                            child: Row(
-                              children: [
-                                Expanded(child: Text("Choose Photo",style: TextStyle(fontSize: 18,color: Colors.white),)),
-                                Icon(Icons.photo_album,color: Colors.blueAccent,size: 25,)
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 60,
-                      child: Card(
-                        color: AppColors.blackFade,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: InkWell(
-                            onTap: (){
-
-                            },
-                            child: Row(
-                              children: [
-                                Expanded(child: Text("Delete Photo",style: TextStyle(fontSize: 18,color: Colors.white),)),
-                                Icon(Icons.delete,color: Colors.red,size: 30,)
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-
-
-                  ],
-                ),
-              ),
-            ),
-          );
-        },);
-      },
-    );
-  }
+  // BottomSheet(FirebaseUserDetailModel user){
+  //   showModalBottomSheet<void>(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return Consumer<SignUpScreenProvider>(builder: (context, value,  child) {
+  //         return Container(
+  //           height: 240,
+  //           color: AppColors.blackFade,
+  //           child: Center(
+  //             child: Padding(
+  //               padding: const EdgeInsets.all(20),
+  //               child: Column(
+  //                 mainAxisAlignment: MainAxisAlignment.start,
+  //                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                 children: <Widget>[
+  //                   Row(
+  //                     children: [
+  //                       const Expanded(child: Text("Edit Profile Picture",style: TextStyle(color: Colors.white,fontSize: 25,fontWeight: FontWeight.bold),)),
+  //                       InkWell(onTap:()=>Navigator.pop(context),child: const Icon(Icons.cancel_outlined,color: AppColors.blueAccent,size: 35,))
+  //                     ],
+  //                   ),
+  //                   SizedBox(height: 30,),
+  //                   SizedBox(
+  //                     height: 60,
+  //                     child: Card(
+  //                       color: AppColors.blackFade,
+  //                       child: Padding(
+  //                         padding: EdgeInsets.symmetric(horizontal: 10),
+  //                         child: InkWell(
+  //                           onTap: (){
+  //                             value.requestPermission();
+  //                           },
+  //                           child: Row(
+  //                             children: [
+  //                               Expanded(child: Text("Choose Photo",style: TextStyle(fontSize: 18,color: Colors.white),)),
+  //                               Icon(Icons.photo_album,color: Colors.blueAccent,size: 25,)
+  //                             ],
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                   SizedBox(
+  //                     height: 60,
+  //                     child: Card(
+  //                       color: AppColors.blackFade,
+  //                       child: Padding(
+  //                         padding: EdgeInsets.symmetric(horizontal: 10),
+  //                         child: InkWell(
+  //                           onTap: (){
+  //
+  //                           },
+  //                           child: Row(
+  //                             children: [
+  //                               Expanded(child: Text("Delete Photo",style: TextStyle(fontSize: 18,color: Colors.white),)),
+  //                               Icon(Icons.delete,color: Colors.red,size: 30,)
+  //                             ],
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   )
+  //
+  //
+  //                 ],
+  //               ),
+  //             ),
+  //           ),
+  //         );
+  //       },);
+  //     },
+  //   );
+  // }
 }
 
