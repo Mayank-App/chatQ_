@@ -2,7 +2,6 @@ import 'package:chat_application/view_model/signupScreenProvider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../resources/app_color.dart';
 import '../resources/app_string.dart';
 import '../resources/app_style.dart';
@@ -42,18 +41,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
                  SizedBox(
                    width: 100,
                    height: 100,
-                   child: Stack(
-                     children: [
+                   child: Consumer<SignUpScreenProvider>(
+                     builder: (context,value,child) {
+                       return Stack(
+                         children: [
+                       !value.isPicked?
                        CircleAvatar(
-                           radius: 60,
-                         ),
-                       Padding(
-                         padding: const EdgeInsets.only(bottom: 5),
-                         child: Align(
-                           alignment: Alignment.bottomRight,
-                             child:Icon(Icons.camera_alt_rounded)),
-                       )
-                     ],
+                               radius: 60,
+                             backgroundImage: NetworkImage(value.imgUrl),
+                             ):
+                       CircleAvatar(
+                             radius: 60,
+                             backgroundImage: FileImage(value.pickedImage!),
+                       ),
+                           Padding(
+                             padding: const EdgeInsets.only(bottom: 5),
+                             child: Align(
+                               alignment: Alignment.bottomRight,
+                                 child:InkWell(
+                                      onTap: () async {
+                                        await  value.requestPermission();
+                                      }
+                                    , child: Icon(Icons.camera_alt_rounded))),
+                           )
+                         ],
+                       );
+                     }
                    ),
                  ),
                  Padding(

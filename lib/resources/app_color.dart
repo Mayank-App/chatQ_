@@ -12,5 +12,6 @@ class AppColors{
   static const Color green = Colors.green;
   static const Color yellow = Colors.yellow;
   static const Color black26 =Colors.black26;
+  static const Color blackFade =Color(0xFF424346);
 
 }

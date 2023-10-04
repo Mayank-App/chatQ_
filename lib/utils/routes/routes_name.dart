@@ -5,4 +5,5 @@ class RoutesName{
   static const splashScreen = "Splash_Screen";
   static const homeScreen = "Home_Screen";
   static const chatRoomScreen ="Chat_Room_Screen";
+  static const personalProfileScreen = "Personal_Profile_Screen";
 }

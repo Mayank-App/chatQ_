@@ -14,7 +14,7 @@ class FirebaseChatUserModel{
   /// if [visibleNo] == 3? message will be visible to everyone
   int visibleNo;
   String chatID;
-  String status;
+  int status;
   int deliveryStatus;
   int star;
 

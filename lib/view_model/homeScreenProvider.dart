@@ -45,7 +45,14 @@ class HomeScreenProvider extends ChangeNotifier {
   }
   Stream<List<FirebaseUserDetailModel>> getAllUsers()
   {
-    return UserProfileStore.getUsersProfile();
+    var datas = UserProfileStore.getUsersProfile();
+    datas.map((event){
+      for(var user in event){
+
+        // debugPrint(user.imageUrl.toString());
+      }
+    });
+    return datas;
   }
 }
 

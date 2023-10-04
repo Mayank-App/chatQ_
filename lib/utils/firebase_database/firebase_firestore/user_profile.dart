@@ -28,6 +28,7 @@ class UserProfileStore{
       return list;
     });
   }
+
   static Stream<FirebaseUserDetailModel?> getCurrentUserProfile(String currentUserUID) {
     final firestoreStream = databaseStore.doc(currentUserUID).snapshots();
     return firestoreStream.map((DocumentSnapshot<Map<String, dynamic>> snapshot) {

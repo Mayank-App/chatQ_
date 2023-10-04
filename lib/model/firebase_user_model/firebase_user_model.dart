@@ -19,7 +19,7 @@ class FirebaseUserDetailModel
       return <String,dynamic> {
          "email" :email,
          "name" :name,
-         "imageUrl":imageUrl=="" ? "https://media.istockphoto.com/id/1131164548/vector/avatar-5.jpg?s=1024x1024&w=is&k=20&c=t1UxKUo5asF5EL4bncWciZwcWfIs9NOf7zfwy1dWl2U=":imageUrl,
+         "imageUrl":imageUrl,
          "pass":pass,
          "uid":uid,
          "joinDate":joinDate
