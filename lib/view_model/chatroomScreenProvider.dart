@@ -114,6 +114,20 @@ class ChatRoomScreenProvider extends ChangeNotifier {
     } on Exception catch (_)
     {}
   }
-
+  Stream<List<FirebaseChatUserModel>> getAllMessage(String receiverUID)
+  {
+    var datas = ChatUserStore.getUsersMessage(receiverUID,_auth.currentUser!.uid);
+    // datas.map((List<FirebaseChatUserModel> chatsList){
+    //   for(var chat in chatsList){
+    //     // debugPrint(user.imageUrl.toString());
+    //     // if(chat.status < 2){
+    //     //
+    //     // }
+    //   }
+    // });
+    return datas;
+  }
 }
+
+
 

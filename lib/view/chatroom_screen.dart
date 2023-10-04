@@ -23,7 +23,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
-    final databaseStoreChat = FirebaseFirestore.instance.collection("chat-collections").doc(ChatUserStore.getChatRoomId(_auth.currentUser!.uid.toString(), widget.receiver.uid)).collection("messages").snapshots();
+   // final databaseStoreChat = FirebaseFirestore.instance.collection("chat-collections").doc(ChatUserStore.getChatRoomId(_auth.currentUser!.uid.toString(), widget.receiver.uid)).collection("messages").snapshots();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -31,7 +32,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         leading: IconButton(onPressed: () {
           Navigator.pop(context);
         },
-          icon: Icon(Icons.arrow_back_ios_new_rounded,color: AppColors.blueAccent,size: 30,),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,color: AppColors.blueAccent,size: 30,),
         ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -39,8 +40,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             CircleAvatar(
               backgroundImage: NetworkImage(widget.receiver.imageUrl?? ""),
             ),
-            SizedBox(width: 15,),
-            Text(widget.receiver.name,style: TextStyle(color: AppColors.blueAccent,fontWeight: FontWeight.w600),),
+            const SizedBox(width: 15,),
+            Text(widget.receiver.name,style: const TextStyle(color: AppColors.blueAccent,fontWeight: FontWeight.w600),),
           ],
         ),
       ),
@@ -50,30 +51,28 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
            return Column(
              children: [
                Expanded(
-                   child: StreamBuilder<QuerySnapshot>(
-                   stream: databaseStoreChat,
-                   builder: (BuildContext context , AsyncSnapshot<QuerySnapshot> snapshot)
+                   child: StreamBuilder<List<FirebaseChatUserModel>>(
+                   stream: value.getAllMessage(widget.receiver.uid),
+                   builder: (BuildContext context ,  chatsSnapshot)
                    {
-                     if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
+                     List<FirebaseChatUserModel>? chatList = chatsSnapshot.data;
+                     if (chatsSnapshot.connectionState == ConnectionState.waiting || !chatsSnapshot.hasData) {
                        return const CircularProgressIndicator();
                      }
-                     else if (snapshot.hasError) {
+                     else if (chatsSnapshot.hasError) {
                        return const Text("Error");
                      }
                      else
                      {
                        return ListView.builder
                          (
-                            itemCount: snapshot.data!.docs.length,
+                            itemCount: chatList!.length,
                             itemBuilder: (context, index) {
-                              var doc = snapshot.data!.docs[index].data();
-                              // debugPrint("Message:"+doc.toString());
-                              FirebaseChatUserModel chat =
-                                  FirebaseChatUserModel.fromJson(
-                                      doc as Map<String, dynamic>);
-                              bool isImage = chat.img!.isEmpty;
+
+
+                              bool isImage = chatList[index].img!.isEmpty;
                               return Row(
-                                mainAxisAlignment: chat.senderUID
+                                mainAxisAlignment: chatList[index].senderUID
                                             .toString() ==
                                         _auth.currentUser!.uid.toString()
                                     ? MainAxisAlignment.end
@@ -81,7 +80,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                 children: [
                                   Column(
                                     crossAxisAlignment:
-                                        chat.senderUID.toString() ==
+                                    chatList[index].senderUID.toString() ==
                                                 _auth.currentUser!.uid
                                                     .toString()
                                             ? CrossAxisAlignment.end
@@ -99,30 +98,30 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                               children: [
                                                 Container(
                                                     constraints:
-                                                        BoxConstraints(
+                                                        const BoxConstraints(
                                                             maxWidth:
                                                                 270),
                                                    child: isImage
                                                         ? Text(
-                                                            chat.message,
+                                                     chatList[index].message,
                                                             style: const TextStyle(
                                                                 color: AppColors
                                                                     .white,
                                                                 fontSize:
                                                                     16),
                                                           )
-                                                        : CachedNetworkImage(imageUrl: chat.img.toString())),
+                                                        : CachedNetworkImage(imageUrl: chatList[index].img.toString())),
                                               ],
                                             ),
                                           )),
                                       Row(
                                         children: [
-                                          Text(chat.time
+                                          Text(chatList[index].time
                                               .substring(11, 16)),
-                                          if (chat.senderUID ==
+                                          if (chatList[index].senderUID ==
                                               _auth.currentUser!.uid
                                                   .toString())
-                                            Icon(Icons.check),
+                                            const Icon(Icons.check),
                                         ],
                                       )
                                     ],
@@ -140,8 +139,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                    {
                       value.requestPermission(widget.receiver.uid);
                    },
-                       icon: Icon(Icons.camera_alt_rounded,size: 35,)),
-                   SizedBox(width: 10,),
+                       icon: const Icon(Icons.camera_alt_rounded,size: 35,)),
+                   const SizedBox(width: 10,),
                    Expanded(
                      child: TextFormField(
                        controller: value.writeController,
@@ -181,7 +180,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                         onTap: (){
                           value.sendMessage(widget.receiver.uid);
                         },
-                           child: Icon(Icons.send,color: AppColors.blueAccent,))
+                           child: const Icon(Icons.send,color: AppColors.blueAccent,))
                    ),
                  ],
                ),

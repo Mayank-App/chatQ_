@@ -28,5 +28,19 @@ class ChatUserStore {
         .onError((error, stackTrace) {
     });
   }
+  static Stream<List<FirebaseChatUserModel>> getUsersMessage(String receiverUID, String senderUID)
+  {
+
+    var databaseStores = databaseStore.doc(getChatRoomId(receiverUID, senderUID)).collection("messages");
+    var datas = databaseStores.snapshots();
+    return datas.map((QuerySnapshot<Map<String, dynamic>> snapshot){
+      final List<FirebaseChatUserModel> list = [];
+      for(final DocumentSnapshot<Map<String, dynamic>> doc in snapshot.docs){
+        final Map<String, dynamic> data = doc.data()!;
+        list.add(FirebaseChatUserModel.fromJson(data));
+      }
+      return list;
+    });
+  }
 
 }

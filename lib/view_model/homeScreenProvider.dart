@@ -48,7 +48,6 @@ class HomeScreenProvider extends ChangeNotifier {
     var datas = UserProfileStore.getUsersProfile();
     datas.map((event){
       for(var user in event){
-
         // debugPrint(user.imageUrl.toString());
       }
     });
