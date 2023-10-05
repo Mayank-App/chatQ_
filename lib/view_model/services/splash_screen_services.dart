@@ -1,7 +1,5 @@
 import 'dart:async';
-
 import 'package:chat_application/utils/routes/routes_name.dart';
-import 'package:chat_application/view/signIn_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import '../../../model/firebase_user_model/firebase_chat_user_model.dart';
 
@@ -43,6 +46,8 @@ class ChatUserStore {
     });
   }
 
+
+
   static Future<void> updateMessageStatus(FirebaseChatUserModel message) async {
     final chatRoomId = getChatRoomId(message.senderUID, message.receiverUID); // Extract chatRoomId from chatID
 
@@ -63,7 +68,39 @@ class ChatUserStore {
       });
     }
   }
-
+  static updateMessageStar(FirebaseChatUserModel message)async {
+    final chatRoomId = getChatRoomId(message.senderUID, message.receiverUID);
+    final messageCollection = databaseStore.doc(chatRoomId).collection("messages");
+    final messageDoc = await messageCollection.doc(message.chatID).get();
+    if (messageDoc.exists) {
+      await messageCollection
+          .doc(message.chatID)
+          .update({ "star": message.star}).then((value) async {
+        debugPrint("Star Updated");
+      }).onError((error, stackTrace) {
+        debugPrint("Star Updation failed");
+      });
+    }
+  }
+  static Future<void> deleteMessage(String receiver, String sender, String chatID, int code) async {
+    final chatRoomId =
+    getChatRoomId(sender, receiver); // Extract chatRoomId from chatID
+    // debugPrint("ChatRoomId is $chatRoomId");
+    final messageCollection = databaseStore.doc(chatRoomId).collection("messages");
+    final messageDoc = await messageCollection.doc(chatID).get();
+    // debugPrint("Message is going to update");
+    if (messageDoc.exists) {
+      // Update the message's status field
+      // debugPrint("Doc exist");
+      await messageCollection
+          .doc(chatID)
+          .update({"visibleNo": code}).then((value) {
+        debugPrint("Message deleted");
+      }).onError((error, stackTrace) {
+        // debugPrint("Message Updation failed");
+      });
+    }
+  }
   // Future<bool> isChatRoomExist(String receiverUID, String senderUID) async  {
   //    String chatRoomId = getChatRoomId(senderUID, receiverUID);
   //   debugPrint(chatRoomId);

@@ -6,7 +6,9 @@ import 'package:chat_application/utils/routes/routes_name.dart';
 import 'package:chat_application/view_model/homeScreenProvider.dart';
 import 'package:chat_application/view_model/signupScreenProvider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget{
@@ -17,9 +19,30 @@ class HomeScreen extends StatefulWidget{
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
+
+  @override
+  void initState()
+  {
+    SystemChannels.lifecycle.setMessageHandler((message) async
+    {
+      debugPrint(message);
+      if(message.toString().contains("pause")) {
+        debugPrint("Updating offline");
+        HomeScreenProvider.setUserStatus(false);
+      }
+      else if(message.toString().contains('resume')){
+        debugPrint("Updating Online");
+        HomeScreenProvider.setUserStatus(true);
+      }
+      return Future.value(message);
+    });
+    super.initState();
+  }
   @override
   // ignore: override_on_non_overriding_member
   final databaseStore = FirebaseFirestore.instance.collection("user").snapshots();
+  // final userId = FirebaseAuth.i
   // ignore: annotate_overrides
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                        height: 60,
                                                        child: ClipOval(
                                                          child: CachedNetworkImage(
-                                                           imageUrl: users[index].imageUrl.toString(),
+                                                           imageUrl: users[index].image.toString(),
                                                            fit: BoxFit.fill,
                                                          ),
                                                        ),
@@ -152,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(
                      width: 350,
                       height: 350,
-                      child: CachedNetworkImage(imageUrl: user.imageUrl!, fit: BoxFit.fill,)),
+                      child: CachedNetworkImage(imageUrl: user.image, fit: BoxFit.fill,)),
                   Center(
                     child: Container(
                       decoration: const BoxDecoration(

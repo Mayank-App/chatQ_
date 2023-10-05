@@ -28,7 +28,6 @@ class SignUpScreenProvider extends ChangeNotifier{
     password.dispose();
    conformPassword.dispose();
   }
-
   FocusNode signUpFocus = FocusNode();
   bool _loading = false;
 
@@ -122,7 +121,7 @@ class SignUpScreenProvider extends ChangeNotifier{
           uid: uid,
           joinDate: joinDate,
           pass: pass,
-          imageUrl: _imgUrl));
+          image: _imgUrl));
        email.clear();
        name.clear();
        password.clear();

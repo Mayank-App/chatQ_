@@ -76,7 +76,7 @@ class _ContactListState extends State<ContactList> {
                                                  height: 60,
                                                  child: ClipOval(
                                                    child: CachedNetworkImage(
-                                                     imageUrl: users[index].imageUrl.toString(),
+                                                     imageUrl: users[index].image.toString(),
                                                      fit: BoxFit.fill,
                                                    ),
                                                  ),
@@ -139,7 +139,7 @@ class _ContactListState extends State<ContactList> {
                   SizedBox(
                       width: 350,
                       height: 350,
-                      child: CachedNetworkImage(imageUrl: user.imageUrl!, fit: BoxFit.fill,)),
+                      child: CachedNetworkImage(imageUrl: user.image, fit: BoxFit.fill,)),
                   Center(
                     child: Container(
                       decoration: const BoxDecoration(

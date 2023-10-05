@@ -38,7 +38,7 @@ class _UserProfileViewState extends State<UserProfileView> {
               Flexible(
                   child: CircleAvatar(
                     radius: 100,
-                    backgroundImage: NetworkImage( widget.user.imageUrl.toString()),
+                    backgroundImage: NetworkImage( widget.user.image.toString()),
                   )
 
               ),

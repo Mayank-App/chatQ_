@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:chat_application/utils/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -23,7 +25,7 @@ class ChatRoomScreenProvider extends ChangeNotifier {
   }
 
   final writeFocusNode = FocusNode();
-  final _auth = FirebaseAuth.instance;
+  final auth = FirebaseAuth.instance;
 
   sendMessage(String receiver, {bool isImage = false, String imageUrl = ""}) {
     String mess = writeController.text.toString().trim();
@@ -34,7 +36,7 @@ class ChatRoomScreenProvider extends ChangeNotifier {
     if (mess.isNotEmpty || isImage) {
       ChatUserStore.sendMessage(FirebaseChatUserModel(
         message: !isImage ? mess : "",
-        senderUID: _auth.currentUser!.uid,
+        senderUID: auth.currentUser!.uid,
         time: time,
         isForwarded: 0,
         receiverUID: receiver,
@@ -82,13 +84,174 @@ class ChatRoomScreenProvider extends ChangeNotifier {
     }
   }
 
+  void addMessage(FirebaseChatUserModel messageModel){
+    selectedMessages.add(messageModel);
+  }
+  void removeMessage(int index){
+    selectedMessages.removeAt(index);
+  }
+  void toggleMessage(FirebaseChatUserModel messageModel) {
+    int isContain = isContains(messageModel);
+    if(isContain == -1)
+    {
+      addMessage(messageModel);
+      debugPrint("Added");
+      notifyListeners();
+    }
+    else
+    {
+      debugPrint("removed");
+      removeMessage(isContain);
+      notifyListeners();
+    }
+    for(var mes in selectedMessages){
+      debugPrint(mes.message);
+    }
+    debugPrint("${selectedMessages.length}");
+  }
+
   bool isUploaded = true;
 
   bool isPicked = false;
 
+  bool isOnline = false;
+
+  getStatus(String uID) {
+    UserProfileStore.getStatus(uID).listen((isActive)
+    {
+      if(isOnline != isActive)
+      {
+        isOnline = isActive;
+        notifyListeners();
+      }
+    });
+    return UserProfileStore.getStatus(uID);
+  }
+
+  List<FirebaseChatUserModel> selectedMessages = [];
+
+  removeAllFromList(){
+    selectedMessages.clear();
+    notifyListeners();
+  }
+  bool isAvailableToStar(){
+    if(selectedMessages[0].senderUID != auth.currentUser!.uid){
+      return true;
+    }
+    return false;
+  }
+
+  toggleStar() {
+    if(selectedMessages[0].star  == 1){
+      selectedMessages[0].star  = 0;
+    }
+    else
+    {
+      selectedMessages[0].star  = 1;
+    }
+    try{
+      ChatUserStore.updateMessageStar(selectedMessages[0]);
+      selectedMessages.clear();
+    } catch (e){
+      debugPrint(e.toString());
+    }
+    notifyListeners();
+  }
+
+   forwardMessage(List<FirebaseChatUserModel> messageModel, String receiver) {
+    DateTime now = DateTime.now();
+    String time = now.toString();
+    String chatID = now.millisecondsSinceEpoch.toString();
+    for(int i = 0; i < messageModel.length; ++i){
+      messageModel[i].chatID = chatID;
+      messageModel[i].time = time;
+      messageModel[i].sentTime = time;
+      messageModel[i].isForwarded = 1;
+      messageModel[i].senderUID = auth.currentUser!.uid;
+      messageModel[i].receiverUID = receiver;
+      messageModel[i].visibleNo = 3;
+      messageModel[i].status = 0;
+      messageModel[i].star = 0;
+      ChatUserStore.sendMessage(messageModel[i]);
+    }
+
+
+  }
+
+  Future<void> copyToClipboard(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: selectedMessages[0].message)).then((value){
+      selectedMessages.clear();
+      Utils.toastMessage("Text Copied");
+     // CustomToast(context: context, message: "Text Copied");
+      notifyListeners();
+    }).onError((error, stackTrace){
+
+    });
+  }
+
+  deleteMessage(FirebaseChatUserModel messageModel, int code) {
+    ChatUserStore.deleteMessage(messageModel.receiverUID, messageModel.senderUID,
+        messageModel.chatID, code)
+        .then((value) {})
+        .onError((error, stackTrace) {});
+  }
+
+  bool isAvailableToDeleteForAll() {
+    String sender = auth.currentUser!.uid.toString();
+    for(int i = 0; i < selectedMessages.length; ++i){
+      if(selectedMessages[i].senderUID != sender){
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void deleteForMe(){
+    deleteMessages(code:1);
+  }
+  void deleteForAll() {
+    deleteMessages(code: 0);
+  }
+
+  void deleteMessages({int code = 0}){
+    if(code == 0)
+    {
+      // Delete for all for sender Message only
+      for(int i = 0; i < selectedMessages.length; ++i)
+      {
+        deleteMessage(selectedMessages[i], 0);
+      }
+    }
+    else
+    {
+
+      for(int i = 0; i < selectedMessages.length; ++i)
+      {
+        // If there exist any receiver message
+        if(selectedMessages[i].senderUID != auth.currentUser!.uid) {
+          if(selectedMessages[i].visibleNo != 3) {
+            deleteMessage(selectedMessages[i], 0);
+          }
+          else {
+            deleteMessage(selectedMessages[i], 2);
+          }
+        }
+        else {
+          if(selectedMessages[i].visibleNo != 3) {
+            deleteMessage(selectedMessages[i], 0);
+          }
+          else {
+            deleteMessage(selectedMessages[i], 1);
+          }
+        }
+      }
+    }
+    removeAllFromList();
+  }
+
   uploadImage(String receiver) async {
     if (!isPicked) return;
-    User user = _auth.currentUser!;
+    User user = auth.currentUser!;
     String timeId = DateTime
         .now()
         .microsecondsSinceEpoch
@@ -123,8 +286,17 @@ class ChatRoomScreenProvider extends ChangeNotifier {
     } on Exception catch (_) {}
   }
 
+  int isContains(FirebaseChatUserModel messageModel){
+    for(int i = 0; i < selectedMessages.length; ++i){
+      if(selectedMessages[i].chatID == messageModel.chatID){
+        return i;
+      }
+    }
+    return -1;
+  }
+
   Stream<List<FirebaseChatUserModel>> getAllMessage(String receiver) {
-    String currentUser = _auth.currentUser!.uid;
+    String currentUser = auth.currentUser!.uid;
     String now = DateTime.now().toString();
 
     Stream<List<FirebaseChatUserModel>> chats =
@@ -147,6 +319,20 @@ class ChatRoomScreenProvider extends ChangeNotifier {
     });
     // debugPrint(chats.toString());
     return chats;
+  }
+
+
+  Stream<Map<String, dynamic>?> getCurrentStatus(String receiverUID)
+  {
+    debugPrint("======================================");
+    UserProfileStore.getStatusUser(receiverUID)?.map((event){
+      debugPrint(event.toString()+ "OnlineStatus");
+    });
+    debugPrint("======================================");
+    return UserProfileStore.getCurrentUserProfile(receiverUID).map((event){
+      // debugPrint(event!.onLineStatus == 0? "Offline" : "Online");
+      // debugPrint(event.toString() + "is the data");
+    });
   }
 
 }
